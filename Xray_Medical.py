@@ -39,15 +39,15 @@ def encode_image_to_base64(image_bytes):
 
 def format_vlm_output_for_display(vlm_raw_text): # For screen display with emojis
     if not vlm_raw_text or "X-RAY IMAGE ANALYSIS OUTPUT:" not in vlm_raw_text:
-        return "? No analysis data available or format is unexpected."
+        return "❌ No analysis data available or format is unexpected."
     lines = vlm_raw_text.splitlines()
     formatted_lines = []
     in_analysis_section = False
     section_emojis = {
-        "Anatomical Region": "?",
-        "Observed Structures & Condition": "?",
-        "Detailed Radiological Findings": "?",
-        "Overall Impression of Visual Findings": "?"
+        "Anatomical Region": "🔍",
+        "Observed Structures & Condition": "🦴",
+        "Detailed Radiological Findings": "📋",
+        "Overall Impression of Visual Findings": "📊"
     }
     for line in lines:
         stripped_line = line.strip()
@@ -254,7 +254,7 @@ def call_llama_3_2_90b_vision_cached(_api_key_for_cache, image_b64_string, custo
                     except json.JSONDecodeError: pass
         return full_response_vlm.strip()
     except requests.exceptions.RequestException as e:
-        error_message = f"? Error calling Llama 3.2 Vision API: {e}"
+        error_message = f"❌ Error calling Llama 3.2 Vision API: {e}"
         if hasattr(e, 'response') and e.response is not None:
             try: error_message += f"\nAPI Response: {e.response.json()}"
             except ValueError: error_message += f"\nAPI Response (text): {e.response.text}"
@@ -272,7 +272,7 @@ def call_palmyra_med_70b_cached(_api_key_for_cache, previous_llm_output, custom_
                 full_response_palmyra.append(chunk.choices[0].delta.content)
         return "".join(full_response_palmyra).strip()
     except Exception as e:
-        st.session_state.palmyra_api_error = f"? Error calling Palmyra-Med-70b API (Explanation): {e}"
+        st.session_state.palmyra_api_error = f"❌ Error calling Palmyra-Med-70b API (Explanation): {e}"
         return None
 
 @st.cache_data(show_spinner=False)
@@ -298,7 +298,7 @@ def call_palmyra_chat_cached(_api_key_for_cache, messages_history):
                 full_response_palmyra_chat.append(chunk.choices[0].delta.content)
         return "".join(full_response_palmyra_chat).strip()
     except Exception as e:
-        st.session_state.palmyra_chat_api_error = f"? Error in Palmyra Chat: {e}" # Specific error state for chat
+        st.session_state.palmyra_chat_api_error = f"❌ Error in Palmyra Chat: {e}" # Specific error state for chat
         return None
 
 # --- Prompts ---
@@ -389,9 +389,9 @@ IMPORTANT INSTRUCTIONS:
 """
 
 # --- Streamlit App Interface ---
-st.set_page_config(layout="wide", page_title="? X-ray AI Insights")
-st.markdown(f"<h1 style='text-align: center;'>?{APP_NAME}</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: grey;'>?AI-assisted interpretation for educational purposes. Not a substitute for professional medical advice.</p>", unsafe_allow_html=True)
+st.set_page_config(layout="wide", page_title="🩺 X-ray AI Insights")
+st.markdown(f"<h1 style='text-align: center;'>🩺{APP_NAME}</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: grey;'>✨AI-assisted interpretation for educational purposes. Not a substitute for professional medical advice.</p>", unsafe_allow_html=True)
 
 
 # Initialize session state variables
@@ -431,19 +431,19 @@ def reset_all_states():
 if APP_LOGO_PATH and os.path.exists(APP_LOGO_PATH):
     st.sidebar.image(APP_LOGO_PATH, width=150)
 else:
-    st.sidebar.markdown("## ? Menu")
-st.sidebar.header("? NVIDIA API Access")
+    st.sidebar.markdown("## 📋 Menu")
+st.sidebar.header("🔑 NVIDIA API Access")
 api_key_input = st.sidebar.text_input("Enter your NVIDIA API Key:", type="password", help="Your API key is used to access the AI models. It is not stored.")
 
 
 NVIDIA_API_GUIDE_LINK = "https://docs.nvidia.com/nim/large-language-models/latest/getting-started.html" # <-- **** REPLACE WITH THE BEST OFFICIAL LINK ****
 st.sidebar.markdown(
-    f"<small>? Don't have an API key? [Learn how to get one from NVIDIA]({NVIDIA_API_GUIDE_LINK})</small>",
+    f"<small>🔑 Don't have an API key? [Learn how to get one from NVIDIA]({NVIDIA_API_GUIDE_LINK})</small>",
     unsafe_allow_html=True
 )
 st.sidebar.divider()
-st.sidebar.subheader("? Medical Q&A")
-if st.sidebar.button("? Chat about Medical Topics", use_container_width=True, key="toggle_chat_popover_btn"):
+st.sidebar.subheader("💬 Medical Q&A")
+if st.sidebar.button("🩺 Chat about Medical Topics", use_container_width=True, key="toggle_chat_popover_btn"):
     st.session_state.show_chat_popover = not st.session_state.show_chat_popover
     # If opening the popover, ensure chat history doesn't persist across different "sessions" of opening it, unless desired.
     # If you want chat to clear every time popover is opened:
@@ -453,18 +453,18 @@ if st.sidebar.button("? Chat about Medical Topics", use_container_width=True, ke
 
 
 # --- Main Page Content ---
-st.warning(f"?? {REPORT_DISCLAIMER_TEXT}")
+st.warning(f"⚠️ {REPORT_DISCLAIMER_TEXT}")
 st.divider()
 
 # --- Chat Popover Logic (conditionally rendered) ---
 if st.session_state.show_chat_popover:
-    with st.popover("? Chat with Medical AI", use_container_width=False): # Set use_container_width to False or adjust width for better popover sizing
-        st.markdown("#### ? Ask Medical Assistant")
+    with st.popover("💬 Chat with Medical AI", use_container_width=False): # Set use_container_width to False or adjust width for better popover sizing
+        st.markdown("#### 🤖 Ask Medical Assistant")
         st.caption("This is a general medical Q&A. For X-ray analysis, please use the main interface below.")
         st.markdown("---")
 
         if not api_key_input:
-            st.warning("?? Please enter your NVIDIA API Key in the sidebar to use the chat.")
+            st.warning("⚠️ Please enter your NVIDIA API Key in the sidebar to use the chat.")
         else:
             # Display existing chat messages
             for msg in st.session_state.palmyra_chat_messages:
@@ -472,7 +472,7 @@ if st.session_state.show_chat_popover:
                     st.markdown(msg["content"]) # Use markdown for potentially formatted responses
 
             # Chat input
-            if user_chat_prompt := st.chat_input("? Ask a medical question... (e.g., 'What are common symptoms of flu?')", key="palmyra_chat_input"):
+            if user_chat_prompt := st.chat_input("❓ Ask a medical question... (e.g., 'What are common symptoms of flu?')", key="palmyra_chat_input"):
                 st.session_state.palmyra_chat_messages.append({"role": "user", "content": user_chat_prompt})
                 with st.chat_message("user"):
                     st.markdown(user_chat_prompt)
@@ -481,7 +481,7 @@ if st.session_state.show_chat_popover:
                 # The system prompt is the very first message in the conversation.
                 api_messages = [{"role": "system", "content": CHAT_SYSTEM_PROMPT_PALMYRA}] + st.session_state.palmyra_chat_messages
 
-                with st.spinner("? Palmyra-Med-70b is thinking..."):
+                with st.spinner("🤖 Palmyra-Med-70b is thinking..."):
                     st.session_state.palmyra_chat_api_error = None # Clear previous error
                     ai_response = call_palmyra_chat_cached(api_key_input, api_messages)
 
@@ -492,14 +492,14 @@ if st.session_state.show_chat_popover:
                     with st.chat_message("assistant"):
                         st.markdown(ai_response) # Use markdown for AI responses
                 else:
-                    st.error("? AI did not return a response for the chat.")
+                    st.error("❌ AI did not return a response for the chat.")
                 st.rerun() # Rerun to update message display immediately
             
             if st.session_state.palmyra_chat_api_error and not user_chat_prompt: # Show persistent error if any
                  st.error(st.session_state.palmyra_chat_api_error)
 
             if st.session_state.palmyra_chat_messages: # Show clear button only if there are messages
-                if st.button("?? Clear Chat History", key="clear_chat_hist_btn_popover"):
+                if st.button("🗑️ Clear Chat History", key="clear_chat_hist_btn_popover"):
                     st.session_state.palmyra_chat_messages = []
                     st.session_state.palmyra_chat_api_error = None
                     st.rerun()
@@ -518,7 +518,7 @@ if st.session_state.show_chat_popover:
 #         st.sidebar.error(f"Sample image '{SAMPLE_IMAGE_FILENAME}' not found.")
 #         st.session_state.sample_image_loaded = False
 
-uploaded_file_obj = st.file_uploader("? Upload your X-ray image (JPG, JPEG, PNG)", type=["jpg", "jpeg", "png"], label_visibility="collapsed", key="file_uploader_widget")
+uploaded_file_obj = st.file_uploader("📁 Upload your X-ray image (JPG, JPEG, PNG)", type=["jpg", "jpeg", "png"], label_visibility="collapsed", key="file_uploader_widget")
 
 current_image_bytes = None
 current_filename = None
@@ -536,24 +536,24 @@ elif st.session_state.sample_image_loaded and st.session_state.uploaded_file_byt
     current_filename = st.session_state.uploaded_filename
 
 if current_image_bytes is None:
-    st.info("?? Please upload an X-ray image to begin exploring AI-assisted insights.")
+    st.info("ℹ️ Please upload an X-ray image to begin exploring AI-assisted insights.")
 else:
     try:
         image_pil = PILImage.open(io.BytesIO(current_image_bytes))
-        st.sidebar.subheader("? Current X-ray Image")
+        st.sidebar.subheader("🩻 Current X-ray Image")
         st.sidebar.image(image_pil, caption=f"Current: {current_filename}", use_container_width=True)
     except Exception as e:
-        st.error(f"? Could not display uploaded image. It might be corrupted. Error: {e}")
+        st.error(f"❌ Could not display uploaded image. It might be corrupted. Error: {e}")
         current_image_bytes = None
 
     if current_image_bytes:
         if not api_key_input:
-            st.error("? Please enter your NVIDIA API Key in the sidebar to activate AI analysis.")
+            st.error("❌ Please enter your NVIDIA API Key in the sidebar to activate AI analysis.")
         else:
             processing_disabled = st.session_state.vlm_analysis_running or st.session_state.palmyra_running
 
             if not st.session_state.vlm_analysis_output and not st.session_state.vlm_analysis_running:
-                if st.button("? Analyze X-ray (Vision AI)", type="primary", use_container_width=True, disabled=processing_disabled):
+                if st.button("🔬 Analyze X-ray (Vision AI)", type="primary", use_container_width=True, disabled=processing_disabled):
                     st.session_state.vlm_analysis_running = True
                     st.session_state.palmyra_output = "" # Clear previous explanation
                     st.session_state.vlm_api_error = None
@@ -561,10 +561,10 @@ else:
                     st.rerun()
 
             if st.session_state.vlm_analysis_running and not st.session_state.vlm_analysis_output:
-                with st.spinner("? AI is performing visual analysis... This may take a moment."):
+                with st.spinner("🔍 AI is performing visual analysis... This may take a moment."):
                     image_b64_string = encode_image_to_base64(current_image_bytes)
                     if len(image_b64_string) >= MAX_ENCODED_IMAGE_SIZE_BYTES:
-                        st.error(f"? Image too large (>{MAX_ENCODED_IMAGE_SIZE_BYTES/1000:.0f}KB encoded). Max original size approx {APPROX_ORIGINAL_IMAGE_LIMIT_KB}KB.")
+                        st.error(f"❌ Image too large (>{MAX_ENCODED_IMAGE_SIZE_BYTES/1000:.0f}KB encoded). Max original size approx {APPROX_ORIGINAL_IMAGE_LIMIT_KB}KB.")
                         st.session_state.vlm_analysis_running = False
                     else:
                         full_response_vlm = call_llama_3_2_90b_vision_cached(api_key_input, image_b64_string, PROMPT_FOR_VLM_IMAGE_ANALYSIS)
@@ -572,54 +572,54 @@ else:
                             st.error(st.session_state.vlm_api_error)
                         elif full_response_vlm is not None:
                             st.session_state.vlm_analysis_output = full_response_vlm
-                            if not st.session_state.vlm_analysis_output: st.error("? Received empty analysis from Vision AI.")
+                            if not st.session_state.vlm_analysis_output: st.error("❌ Received empty analysis from Vision AI.")
                         else: # Should be caught by vlm_api_error, but as a fallback
-                            if not st.session_state.vlm_api_error: st.error("? Vision AI call failed without specific error.")
+                            if not st.session_state.vlm_api_error: st.error("❌ Vision AI call failed without specific error.")
                         st.session_state.vlm_analysis_output = st.session_state.vlm_analysis_output or "" # Ensure it's a string
                     st.session_state.vlm_analysis_running = False
                     st.rerun()
 
             if st.session_state.vlm_analysis_output:
-                with st.expander("? AI's Visual Analysis (Vision Model)", expanded=True):
+                with st.expander("🔬 AI's Visual Analysis (Vision Model)", expanded=True):
                     formatted_vlm_output_for_screen = format_vlm_output_for_display(st.session_state.vlm_analysis_output)
                     st.markdown(formatted_vlm_output_for_screen)
                     try:
                         pdf_data_vlm = generate_xray_report_pdf(xray_image_bytes=current_image_bytes, original_filename=current_filename, raw_vlm_output=st.session_state.vlm_analysis_output, palmyra_output=None)
-                        st.download_button(label="? Download Vision AI Analysis (PDF)", data=pdf_data_vlm, file_name=f"vision_ai_report_{current_filename or 'sample'}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf", mime="application/pdf", use_container_width=True)
-                    except Exception as e: st.error(f"? Failed to generate Vision AI PDF report: {e}")
+                        st.download_button(label="📄 Download Vision AI Analysis (PDF)", data=pdf_data_vlm, file_name=f"vision_ai_report_{current_filename or 'sample'}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf", mime="application/pdf", use_container_width=True)
+                    except Exception as e: st.error(f"❌ Failed to generate Vision AI PDF report: {e}")
 
                 st.divider()
 
                 if not st.session_state.palmyra_output and not st.session_state.palmyra_running:
-                    if st.button("? Get Patient-Friendly Explanation (Medical AI)", type="primary", use_container_width=True, disabled=processing_disabled or not st.session_state.vlm_analysis_output):
+                    if st.button("🩺 Get Patient-Friendly Explanation (Medical AI)", type="primary", use_container_width=True, disabled=processing_disabled or not st.session_state.vlm_analysis_output):
                         st.session_state.palmyra_running = True
                         st.session_state.palmyra_api_error = None
                         st.rerun()
 
                 if st.session_state.palmyra_running and not st.session_state.palmyra_output:
-                    with st.spinner("? AI (Medical) is generating a patient-friendly explanation..."):
+                    with st.spinner("🩺 AI (Medical) is generating a patient-friendly explanation..."):
                         full_response_palmyra = call_palmyra_med_70b_cached(api_key_input, st.session_state.vlm_analysis_output, PROMPT_FOR_PALMYRA_REMEDIATION)
                         if st.session_state.palmyra_api_error:
                             st.error(st.session_state.palmyra_api_error)
                         elif full_response_palmyra is not None:
                             st.session_state.palmyra_output = full_response_palmyra
-                            if not st.session_state.palmyra_output: st.error("? Received empty explanation from Medical AI.")
+                            if not st.session_state.palmyra_output: st.error("❌ Received empty explanation from Medical AI.")
                         else: # Should be caught by palmyra_api_error
-                            if not st.session_state.palmyra_api_error: st.error("? Medical AI call failed without specific error.")
+                            if not st.session_state.palmyra_api_error: st.error("❌ Medical AI call failed without specific error.")
                         st.session_state.palmyra_output = st.session_state.palmyra_output or "" # Ensure it's a string
                     st.session_state.palmyra_running = False
                     st.rerun()
 
                 if st.session_state.palmyra_output:
-                    with st.expander("???? Patient-Friendly Explanation & Suggestions (Medical AI)", expanded=True):
+                    with st.expander("👨‍⚕️ Patient-Friendly Explanation & Suggestions (Medical AI)", expanded=True):
                         st.markdown(st.session_state.palmyra_output)
                         try:
                             pdf_data_full = generate_xray_report_pdf(xray_image_bytes=current_image_bytes, original_filename=current_filename, raw_vlm_output=st.session_state.vlm_analysis_output, palmyra_output=st.session_state.palmyra_output)
-                            st.download_button(label="? Download Full AI Report (PDF)", data=pdf_data_full, file_name=f"full_ai_xray_report_{current_filename or 'sample'}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf", mime="application/pdf", use_container_width=True)
-                        except Exception as e: st.error(f"? Failed to generate full PDF report: {e}")
+                            st.download_button(label="📋 Download Full AI Report (PDF)", data=pdf_data_full, file_name=f"full_ai_xray_report_{current_filename or 'sample'}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf", mime="application/pdf", use_container_width=True)
+                        except Exception as e: st.error(f"❌ Failed to generate full PDF report: {e}")
 
                     st.divider()
-                    st.subheader("? Find a Specialist (via Google Search)")
+                    st.subheader("🏥 Find a Specialist (via Google Search)")
                     extracted_specialty = "doctor"
                     if st.session_state.palmyra_output:
                         palmyra_text_lower = st.session_state.palmyra_output.lower()
@@ -647,7 +647,7 @@ else:
 
                     st.write(f"Based on the AI's insights, consulting with a **{extracted_specialty}** might be beneficial.")
                     user_location_input = st.text_input(
-                        f"? Enter your City, Postal Code, or general area to search:",
+                        f"📍 Enter your City, Postal Code, or general area to search:",
                         placeholder=f"e.g., New York, NY or 10001",
                         key="doctor_finder_location_input_gs_final_v3"
                     )
@@ -655,18 +655,18 @@ else:
                         search_query = f"{extracted_specialty} near {user_location_input}"
                         google_search_url = f"https://www.google.com/search?q={quote_plus(search_query)}" # Corrected https
                         st.link_button(
-                            f"? Search for {extracted_specialty}s in '{user_location_input}' on Google",
+                            f"🔍 Search for {extracted_specialty}s in '{user_location_input}' on Google",
                             google_search_url, use_container_width=True, type="primary"
                         )
                         st.caption("This will open Google Search in a new tab.")
                     else:
-                        st.info("?? Enter a location above to enable the 'Find a Specialist' search link.")
+                        st.info("ℹ️ Enter a location above to enable the 'Find a Specialist' search link.")
 
             if st.session_state.vlm_analysis_output or st.session_state.palmyra_output:
-                if st.button("? Start Over / New Image", use_container_width=True, key="start_over_main_btn"):
+                if st.button("🔄 Start Over / New Image", use_container_width=True, key="start_over_main_btn"):
                     reset_all_states()
                     st.query_params.clear()
                     st.rerun()
 
 st.divider()
-st.markdown("<p style='text-align: center; color: grey;'>? This AI tool is for educational demonstration only. Not for clinical use. Always consult a medical professional.</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: grey;'>🤖 This AI tool is for educational demonstration only. Not for clinical use. Always consult a medical professional.</p>", unsafe_allow_html=True)
